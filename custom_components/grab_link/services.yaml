@@ -1,0 +1,15 @@
+set_share_message:
+  name: Set share message
+  description: Replaces the Grab share message or link that the targeted Grab Link Tracking entries track.
+  target:
+    entity:
+      integration: grab_link
+  fields:
+    message:
+      name: Share message
+      description: The full Grab share text or just the https://app.grab.com/s/... link.
+      example: "Your Grab order is on the way! Track it here: https://app.grab.com/s/QN3E7Rna"
+      required: true
+      selector:
+        text:
+          multiline: true

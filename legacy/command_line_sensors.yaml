@@ -1,0 +1,23 @@
+  - sensor:
+      name: Grab Link Booking
+      unique_id: grab_link_booking
+      command: >-
+        bash /config/scripts/grab_link.sh
+        '{{ states("input_text.grab_link_share_message") | replace("'", "'\\''") }}'
+      value_template: "{{ value_json.booking_state | default('unknown') }}"
+      json_attributes:
+        - booking_state
+        - driver_arrival_utc
+        - route_eta_unix
+        - message
+        - is_pending_delivery
+        - driver_name
+        - pickup
+        - dropoff
+        - title
+      scan_interval: 30
+      
+  - sensor:
+      name: Grab Link Debug
+      unique_id: grab_link_debug
+      command: 'cat /config/scripts/grab_link.log'
