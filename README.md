@@ -11,7 +11,7 @@ sensors: booking state, ETA, driver, vehicle, pickup/drop-off and status
 message — plus *driver approaching* and *order cancelled* binary sensors you can
 automate on.
 
-Setup asks you nothing: adding the integration instantly provisions a **Grab**
+Adding the integration instantly provisions a **Grab**
 dashboard in the sidebar (icon `mdi:moped`) with a text box where you paste the
 share link.
 
@@ -27,7 +27,6 @@ share link.
 
 ## Features
 
-- **Zero-question setup** – adding the integration asks for nothing
 - **Auto dashboard** – a *Grab* sidebar dashboard (`mdi:moped`) with a
   **Share message** text box and all order details; created on install
 - **Live polling** – booking details refresh every 30 s by default (configurable)
@@ -57,20 +56,15 @@ share link.
 
 ### HACS (recommended)
 
-1. Open **HACS** from the **Home Assistant sidebar** (not via
-   *Settings → Marketplace*).
+1. Open **HACS** from the **Home Assistant sidebar**.
    *If HACS is not in the sidebar, you will find it under
    **Settings → Marketplace**.*
 2. Open **HACS → Integrations**.
 3. Open the menu (⋮) → **Custom repositories**.
 4. Add `https://github.com/realkibou/grab-for-home-assistant` with category
    **Integration**.
-5. Search for **Grab for Home Assistant** and choose **Download**
-   (or **Install**).
-6. **Restart Home Assistant**.
-7. Go to **Settings → Devices & services → Add integration**, search for
-   **Grab for Home Assistant** and confirm. There is nothing to fill in — setup
-   completes instantly and the **Grab** dashboard appears in the sidebar.
+5. Search for **Grab for Home Assistant** and choose **Install**.
+6. Done.
 
 ### Manual
 
@@ -79,14 +73,10 @@ Copy the `custom_components/grab_link` folder into your Home Assistant
 
 ## Getting started
 
-1. Go to **Settings → Devices & services → Add integration** and pick
-   **Grab for Home Assistant**. Confirm the setup — there is nothing to fill in.
-   The entry is created immediately and a **Grab** dashboard appears in the
-   sidebar.
-2. Open the **Grab** dashboard.
-3. Paste the Grab share message or just the `https://app.grab.com/s/...` link
+1. Open the **Grab** dashboard.
+2. Paste the Grab share message or just the `https://app.grab.com/s/...` link
    into the **Share message** text box and press Enter.
-4. The sensors fill in within a few seconds. Paste a new link there whenever
+3. The sensors fill in within a few seconds. Paste a new link there whenever
    you have a new order.
 
 The share link is stored in the config entry, so it survives restarts.
