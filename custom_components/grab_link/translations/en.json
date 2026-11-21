@@ -1,6 +1,12 @@
 {
   "title": "Grab for Home Assistant",
   "config": {
+    "step": {
+      "user": {
+        "title": "Grab for Home Assistant",
+        "description": "Adds Grab Link Tracking and creates the Grab dashboard in the sidebar. No share link is needed here."
+      }
+    },
     "abort": {
       "already_configured": "Grab for Home Assistant is already set up."
     }
