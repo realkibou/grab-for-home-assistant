@@ -53,4 +53,9 @@ API_HEADERS: Final[dict[str, str]] = {
     ),
 }
 
-PLATFORMS: Final = [Platform.BINARY_SENSOR, Platform.SENSOR]
+# Dashboard provisioned by the integration
+DASHBOARD_URL_PATH: Final = "grab"
+DASHBOARD_TITLE: Final = "Grab"
+DASHBOARD_ICON: Final = "mdi:moped"
+
+PLATFORMS: Final = [Platform.BINARY_SENSOR, Platform.SENSOR, Platform.TEXT]

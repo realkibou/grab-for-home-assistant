@@ -1,23 +1,8 @@
 {
-  "title": "Grab Link Tracking",
+  "title": "Grab for Home Assistant",
   "config": {
-    "step": {
-      "user": {
-        "title": "Add a Grab share link",
-        "description": "Paste the full Grab share message (for example from WhatsApp or Telegram) or just the https://app.grab.com/s/... link.",
-        "data": {
-          "share_message": "Grab share message or link"
-        }
-      }
-    },
-    "error": {
-      "no_share_url": "No Grab share link was found in the message.",
-      "cannot_resolve": "The Grab share link could not be resolved. Check the link and try again.",
-      "booking_details_failed": "Grab did not return booking details for this link.",
-      "unknown": "Unexpected error. Check the Home Assistant logs."
-    },
     "abort": {
-      "already_configured": "This Grab share link is already set up."
+      "already_configured": "Grab for Home Assistant is already set up."
     }
   },
   "options": {
@@ -79,6 +64,11 @@
     "binary_sensor": {
       "driver_approaching": {
         "name": "Driver approaching"
+      }
+    },
+    "text": {
+      "share_message": {
+        "name": "Share message"
       }
     }
   }

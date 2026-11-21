@@ -1,4 +1,6 @@
-# Grab Link Tracking for Home Assistant
+# Grab for Home Assistant
+
+<img src="custom_components/grab_link/brand/icon@2x.png" alt="Grab for Home Assistant" width="120" align="right">
 
 [![HACS Custom](https://img.shields.io/badge/HACS-Custom-41BDF5.svg?style=flat-square)](https://hacs.xyz)
 [![GitHub Release](https://img.shields.io/github/v/release/realkibou/grab-for-home-assistant?style=flat-square)](https://github.com/realkibou/grab-for-home-assistant/releases)
@@ -8,29 +10,34 @@ Turn a **Grab share link** ("Track my order" message) into live Home Assistant
 sensors: booking state, ETA, driver, vehicle, pickup/drop-off and status
 message — plus a *driver approaching* binary sensor you can automate on.
 
-No bash scripts, `command_line` sensors, template sensors or `jq` required.
-Paste the share message once and the integration handles the rest.
+Setup asks you nothing: adding the integration instantly provisions a **Grab**
+dashboard in the sidebar (icon `mdi:moped`) with a text box where you paste the
+share link.
 
-> **Unofficial.** This project is not affiliated with, endorsed by or supported
-> by Grab. It uses the same public share-tracking endpoint that
-> `sharelocation.grab.com` uses in a browser. Grab may change it at any time.
+> ⚠️ **HACS is not accessible via Settings → Marketplace.** HACS lives in the
+> Home Assistant **sidebar** (the HACS entry). Use that to add this repository.
+
+> **Unofficial.** Not affiliated with, endorsed by or supported by Grab. It
+> uses the same public share-tracking endpoint as
+> `sharelocation.grab.com`. Grab may change it at any time.
 
 ---
 
 ## Features
 
-- **UI setup** – add the integration and paste the Grab share message or link
+- **Zero-question setup** – adding the integration asks for nothing
+- **Auto dashboard** – a *Grab* sidebar dashboard (`mdi:moped`) with a
+  **Share message** text box and all order details; created on install
 - **Live polling** – booking details refresh every 30 s by default (configurable)
-- **One device per order** – all entities grouped under a *Grab Link* device
-- **Full detail set** – booking state, route ETA, driver arrival, driver name,
-  vehicle model/plate, pickup and drop-off, status title/message, pending
-  delivery flag and booking code
+- **Native sensors** – booking state, booking code, route ETA, driver arrival,
+  driver name, vehicle model/plate, pickup/drop-off, status title/message,
+  pending delivery
 - **Driver approaching binary sensor** – on when the ETA is within a
   configurable window (default 5 minutes)
 - **`grab_link.set_share_message` service** – swap the tracked order from an
-  automation or script without touching the integration settings
+  automation or script
 - **Diagnostics** – downloadable redacted diagnostics for troubleshooting
-- **HACS ready** – validated by hassfest and the HACS action on every push
+- **HACS ready** – validated by hassfest and the HACS action
 
 ## Requirements
 
@@ -43,28 +50,31 @@ Paste the share message once and the integration handles the rest.
 
 ### HACS (recommended)
 
-1. Open **HACS → Integrations**.
-2. Open the menu (⋮) → **Custom repositories**.
-3. Add `https://github.com/realkibou/grab-for-home-assistant` with category
+1. Open **HACS from the Home Assistant sidebar** (not Settings → Marketplace).
+2. Go to **Integrations**.
+3. Open the menu (⋮) → **Custom repositories**.
+4. Add `https://github.com/realkibou/grab-for-home-assistant` with category
    **Integration**.
-4. Search for **Grab Link Tracking** and choose **Download**.
-5. **Restart Home Assistant**.
+5. Search for **Grab for Home Assistant** and choose **Download**.
+6. **Restart Home Assistant**.
 
 ### Manual
 
 Copy the `custom_components/grab_link` folder into your Home Assistant
 `config/custom_components/` directory and restart Home Assistant.
 
-## Configuration
+## Getting started
 
-1. Go to **Settings → Devices & services → Add integration**.
-2. Search for **Grab Link Tracking**.
-3. Paste the full share message or just the `https://app.grab.com/s/...` link.
-4. Submit — the message is validated against Grab before the entry is created.
+1. Go to **Settings → Devices & services → Add integration** and pick
+   **Grab for Home Assistant**. There is nothing to fill in — the entry is
+   created immediately and a **Grab** dashboard appears in the sidebar.
+2. Open the **Grab** dashboard.
+3. Paste the Grab share message or just the `https://app.grab.com/s/...` link
+   into the **Share message** text box and press Enter.
+4. The sensors fill in within a few seconds. Paste a new link there whenever
+   you have a new order.
 
-Each config entry tracks one order. A share link can only be added once; to
-track a different order, either update the existing entry with the
-[service](#updating-the-tracked-order) or add a new entry with a new link.
+The share link is stored in the config entry, so it survives restarts.
 
 ### Options
 
@@ -77,19 +87,18 @@ Open the integration entry and choose **Configure**:
 
 ## Updating the tracked order
 
-When you receive a new Grab link, call the `grab_link.set_share_message`
-service instead of re-adding the integration. Target the Grab Link device or
-any of its entities:
+Paste the new link into the **Share message** text box on the Grab dashboard,
+or call the `grab_link.set_share_message` service:
 
 ```yaml
 action: grab_link.set_share_message
 target:
-  entity_id: sensor.grab_link_booking
+  entity_id: text.grab_link_share_message
 data:
   message: "https://app.grab.com/s/QN3E7Rna"
 ```
 
-If no target is given, **all** Grab Link Tracking entries are updated.
+If no target is given, **all** Grab for Home Assistant entries are updated.
 
 ### Example: track whatever is in a helper
 
@@ -111,9 +120,6 @@ actions:
       message: "{{ states('input_text.grab_share_message') }}"
 ```
 
-This reproduces the old `input_text` + `command_line` workflow, without any
-shell script.
-
 ## Entities
 
 The device is named **Grab Link** (the config entry title), so the entity IDs
@@ -121,6 +127,7 @@ below assume you keep that name.
 
 | Entity | Description |
 | --- | --- |
+| `text.grab_link_share_message` | Text box holding the tracked share link |
 | `sensor.grab_link_booking` | Booking state (e.g. `ONGOING`); all details as attributes |
 | `sensor.grab_link_booking_code` | Grab booking code |
 | `sensor.grab_link_route_eta` | Route ETA (timestamp) |
@@ -146,24 +153,20 @@ These names match the original YAML-based setup, so existing template sensors
 and dashboards that read attributes from `sensor.grab_link_booking` keep
 working.
 
+## The Grab dashboard
+
+The integration creates a storage dashboard at `/grab` with a *sections* view:
+
+- **Grab Link** – share message text box, booking state, driver, order
+  from/to, route ETA, driver arrival, message, title
+- **Driver & Vehicle** – vehicle model/plate, booking code, driver approaching
+- **Delivery** – pending delivery flag
+
+You can rearrange and extend it freely; the integration only creates the
+dashboard when it does not exist. If you delete it, it is recreated on the next
+start.
+
 ## Examples
-
-### Dashboard card
-
-```yaml
-type: entities
-title: Grab order
-entities:
-  - entity: sensor.grab_link_booking
-  - entity: sensor.grab_link_route_eta
-  - entity: sensor.grab_link_driver_arrival
-  - entity: sensor.grab_link_driver_name
-  - entity: sensor.grab_link_vehicle_model
-  - entity: sensor.grab_link_vehicle_plate
-  - entity: sensor.grab_link_order_from
-  - entity: sensor.grab_link_order_to
-  - entity: binary_sensor.grab_link_driver_approaching
-```
 
 ### Notify when the driver is approaching
 
@@ -192,7 +195,7 @@ actions:
 3. Booking details are fetched from
    `https://api.grab.com/api/v1/safety/sharemyride/<booking_id>/bookingdetails`.
 
-The booking ID is resolved once per entry and reused for polling, so the short
+The booking ID is resolved once per link and reused for polling, so the short
 link is not requested every cycle.
 
 ## Troubleshooting
@@ -208,15 +211,16 @@ logger:
 Common situations:
 
 - **Errors in the log after the delivery finishes** – the Grab share endpoint
-  stops returning details for completed/expired orders. Update the entry with a
-  new link via the service, or remove it.
-- **`booking_details_failed` when adding** – the link is expired or Grab
-  rejected the request. Try the link in a browser; if it opens the tracking
-  page, retry from Home Assistant.
+  stops returning details for completed/expired orders. Paste the next order's
+  link into the Share message box.
+- **Sensors show `unknown`** – no link is configured yet; paste one on the
+  Grab dashboard.
+- **Invalid link rejected in the text box** – the text must contain a
+  `https://app.grab.com/s/...` link.
 - **Rate limiting** – keep the update interval sensible (30 s is plenty). Very
   aggressive polling may get your IP throttled by Grab.
-- **Diagnostics** – use **Download diagnostics** on the integration entry to
-  get redacted state for bug reports.
+- **Diagnostics** – use **Download diagnostics** on the integration entry for
+  redacted state when reporting a bug.
 
 ## Legacy YAML setup
 

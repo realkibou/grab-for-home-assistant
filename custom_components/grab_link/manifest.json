@@ -1,13 +1,14 @@
 {
   "domain": "grab_link",
-  "name": "Grab Link Tracking",
+  "name": "Grab for Home Assistant",
   "codeowners": ["@realkibou"],
   "config_flow": true,
+  "dependencies": ["lovelace"],
   "documentation": "https://github.com/realkibou/grab-for-home-assistant",
   "homeassistant": "2024.11.0",
   "integration_type": "service",
   "iot_class": "cloud_polling",
   "issue_tracker": "https://github.com/realkibou/grab-for-home-assistant/issues",
   "requirements": [],
-  "version": "1.0.0"
+  "version": "1.1.0"
 }

@@ -1,6 +1,6 @@
 set_share_message:
   name: Set share message
-  description: Replaces the Grab share message or link that the targeted Grab Link Tracking entries track.
+  description: Replaces the Grab share message or link that the targeted Grab Link Tracking entries track. You can also paste the link into the "Share message" text box on the Grab dashboard.
   target:
     entity:
       integration: grab_link

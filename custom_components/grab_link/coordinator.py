@@ -64,7 +64,7 @@ class GrabCoordinator(DataUpdateCoordinator[dict[str, Any]]):
         """Initialize the coordinator."""
         self.entry = entry
         self.client = client
-        self.share_message: str = entry.data[CONF_SHARE_MESSAGE]
+        self.share_message: str = entry.data.get(CONF_SHARE_MESSAGE, "")
         self.booking_id: str | None = None
         self.share_url: str | None = None
 
@@ -77,8 +77,43 @@ class GrabCoordinator(DataUpdateCoordinator[dict[str, Any]]):
             ),
         )
 
+    async def async_update_share_message(self, message: str) -> None:
+        """Set a new share message, persist it and refresh immediately."""
+        message = message.strip()
+
+        if (
+            message == self.share_message
+            and self.entry.data.get(CONF_SHARE_MESSAGE, "") == message
+        ):
+            await self.async_request_refresh()
+            return
+
+        self._apply_share_message(message)
+        self.hass.config_entries.async_update_entry(
+            self.entry,
+            data={**self.entry.data, CONF_SHARE_MESSAGE: message},
+        )
+        await self.async_request_refresh()
+
+    async def async_apply_entry_message(self) -> None:
+        """Re-read the share message from the config entry and refresh."""
+        message = self.entry.data.get(CONF_SHARE_MESSAGE, "")
+        if message == self.share_message:
+            return
+        self._apply_share_message(message)
+        await self.async_request_refresh()
+
+    def _apply_share_message(self, message: str) -> None:
+        """Apply a message and forget the resolved booking."""
+        self.share_message = message
+        self.booking_id = None
+        self.share_url = None
+
     async def _async_update_data(self) -> dict[str, Any]:
         """Fetch the latest booking details."""
+        if not self.share_message:
+            return {}
+
         try:
             if self.booking_id is None:
                 resolved = await self.client.resolve_share_message(self.share_message)

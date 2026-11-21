@@ -1,5 +1,5 @@
 {
-  "name": "Grab Link Tracking",
+  "name": "Grab for Home Assistant",
   "render_readme": true,
   "homeassistant": "2024.11.0"
 }
