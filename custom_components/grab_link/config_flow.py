@@ -12,6 +12,7 @@ import voluptuous as vol
 
 from homeassistant import config_entries
 from homeassistant.config_entries import ConfigFlowResult
+from homeassistant.core import callback
 from homeassistant.helpers.selector import (
     NumberSelector,
     NumberSelectorConfig,
@@ -48,9 +49,32 @@ class GrabConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         self._abort_if_unique_id_configured()
         return self.async_create_entry(title="Grab Link", data={})
 
+    @staticmethod
+    @callback
+    def async_get_options_flow(
+        config_entry: config_entries.ConfigEntry,
+    ) -> GrabOptionsFlow:
+        """Return the options flow so Configure stays available."""
+        return GrabOptionsFlow()
+
 
 class GrabOptionsFlow(config_entries.OptionsFlow):
     """Handle the Grab Link options flow."""
+
+    @property
+    def _entry(self) -> config_entries.ConfigEntry:
+        """Return the config entry linked to this options flow.
+
+        Home Assistant 2024.11 only exposes the entry id via ``handler``,
+        newer versions provide ``config_entry`` directly.
+        """
+        entry = getattr(self, "config_entry", None)
+        if entry is not None:
+            return entry
+        entry = self.hass.config_entries.async_get_entry(self.handler)
+        if entry is None:  # pragma: no cover - the flow manager validates this
+            raise config_entries.UnknownEntry(self.handler)
+        return entry
 
     async def async_step_init(
         self, user_input: dict[str, Any] | None = None
@@ -59,7 +83,7 @@ class GrabOptionsFlow(config_entries.OptionsFlow):
         if user_input is not None:
             return self.async_create_entry(title="", data=user_input)
 
-        options = self.config_entry.options
+        options = self._entry.options
 
         return self.async_show_form(
             step_id="init",

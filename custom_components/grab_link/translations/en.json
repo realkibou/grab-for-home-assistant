@@ -52,10 +52,10 @@
         "name": "Order to"
       },
       "title": {
-        "name": "Status title"
+        "name": "Title"
       },
       "message": {
-        "name": "Status message"
+        "name": "Message"
       },
       "pending_delivery": {
         "name": "Pending delivery"
@@ -65,11 +65,29 @@
       },
       "vehicle_plate": {
         "name": "Vehicle plate"
+      },
+      "last_poll": {
+        "name": "Last poll"
+      },
+      "debug": {
+        "name": "Debug"
+      },
+      "debug_route_eta": {
+        "name": "Debug route ETA"
+      },
+      "debug_now_timestamp": {
+        "name": "Debug now timestamp"
+      },
+      "eta_difference": {
+        "name": "ETA difference"
       }
     },
     "binary_sensor": {
       "driver_approaching": {
         "name": "Driver approaching"
+      },
+      "order_cancelled": {
+        "name": "Order cancelled"
       }
     },
     "text": {

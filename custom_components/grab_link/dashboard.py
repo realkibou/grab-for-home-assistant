@@ -8,7 +8,9 @@ from homeassistant.core import HomeAssistant
 
 from .const import DASHBOARD_ICON, DASHBOARD_TITLE, DASHBOARD_URL_PATH, LOGGER
 
-DASHBOARD_CONFIG: dict[str, Any] = {
+# Layout shipped with 1.1.x. It is only replaced when the stored dashboard is
+# exactly this auto-generated layout, so user edits are never overwritten.
+DASHBOARD_CONFIG_V1: dict[str, Any] = {
     "title": DASHBOARD_TITLE,
     "views": [
         {
@@ -85,6 +87,95 @@ DASHBOARD_CONFIG: dict[str, Any] = {
     ],
 }
 
+DASHBOARD_CONFIG: dict[str, Any] = {
+    "title": DASHBOARD_TITLE,
+    "views": [
+        {
+            "title": DASHBOARD_TITLE,
+            "icon": DASHBOARD_ICON,
+            "type": "sections",
+            "sections": [
+                {
+                    "type": "grid",
+                    "cards": [
+                        {
+                            "type": "entities",
+                            "title": "Grab Link",
+                            "entities": [
+                                {
+                                    "entity": "text.grab_link_share_message",
+                                    "name": "Share Message",
+                                },
+                                {
+                                    "entity": "sensor.grab_link_booking",
+                                    "name": "Booking State",
+                                },
+                                {
+                                    "entity": "sensor.grab_link_driver_name",
+                                    "name": "Driver",
+                                },
+                                {
+                                    "entity": "sensor.grab_link_order_from",
+                                    "name": "Order From",
+                                },
+                                {
+                                    "entity": "sensor.grab_link_order_to",
+                                    "name": "Order To",
+                                },
+                                {
+                                    "entity": "sensor.grab_link_route_eta",
+                                    "name": "Route ETA",
+                                },
+                                {
+                                    "entity": "sensor.grab_link_driver_arrival",
+                                    "name": "Driver Arrival",
+                                },
+                                {
+                                    "entity": "sensor.grab_link_message",
+                                    "name": "Message",
+                                },
+                                {
+                                    "entity": "sensor.grab_link_title",
+                                    "name": "Title",
+                                },
+                            ],
+                        },
+                        {
+                            "type": "entities",
+                            "title": "Driver & Vehicle",
+                            "entities": [
+                                "sensor.grab_link_vehicle_model",
+                                "sensor.grab_link_vehicle_plate",
+                                "sensor.grab_link_booking_code",
+                                "binary_sensor.grab_link_driver_approaching",
+                                "binary_sensor.grab_link_order_cancelled",
+                            ],
+                        },
+                        {
+                            "type": "entities",
+                            "title": "Delivery",
+                            "entities": [
+                                "sensor.grab_link_pending_delivery",
+                            ],
+                        },
+                        {
+                            "type": "entities",
+                            "title": "Debug",
+                            "entities": [
+                                "sensor.grab_link_debug",
+                                "sensor.grab_link_last_poll",
+                                "sensor.grab_link_debug_route_eta",
+                                "sensor.grab_link_debug_now_timestamp",
+                                "sensor.grab_link_eta_difference",
+                            ],
+                        },
+                    ],
+                },
+            ],
+        },
+    ],
+}
+
 
 async def async_ensure_dashboard(hass: HomeAssistant) -> None:
     """Create the Grab dashboard and sidebar panel if it does not exist yet."""
@@ -110,7 +201,9 @@ async def async_ensure_dashboard(hass: HomeAssistant) -> None:
         LOGGER.warning("Lovelace is not set up, skipping Grab dashboard")
         return
 
-    if DASHBOARD_URL_PATH in lovelace_data.dashboards:
+    existing = lovelace_data.dashboards.get(DASHBOARD_URL_PATH)
+    if existing is not None:
+        await _async_upgrade_existing_dashboard(existing)
         return
 
     created = False
@@ -166,3 +259,27 @@ async def async_ensure_dashboard(hass: HomeAssistant) -> None:
             await dashboard.async_save(DASHBOARD_CONFIG)
         except Exception:
             LOGGER.exception("Could not save the Grab dashboard config")
+
+
+async def _async_upgrade_existing_dashboard(dashboard: Any) -> None:
+    """Upgrade an untouched 1.1.x dashboard to the current layout."""
+    from homeassistant.components.lovelace import dashboard as lovelace_dashboard
+
+    if not isinstance(dashboard, lovelace_dashboard.LovelaceStorage):
+        return
+
+    try:
+        config = await dashboard.async_load(False)
+    except Exception:  # pragma: no cover - defensive
+        LOGGER.debug("Could not read the Grab dashboard for upgrade", exc_info=True)
+        return
+
+    if config != DASHBOARD_CONFIG_V1:
+        return
+
+    try:
+        await dashboard.async_save(DASHBOARD_CONFIG)
+    except Exception:  # pragma: no cover - defensive
+        LOGGER.exception("Could not upgrade the Grab dashboard layout")
+    else:
+        LOGGER.info("Upgraded the auto-generated Grab dashboard layout")

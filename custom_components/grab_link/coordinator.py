@@ -2,12 +2,13 @@
 
 from __future__ import annotations
 
-from datetime import timedelta
+from datetime import datetime, timedelta
 from typing import Any
 
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
+from homeassistant.util import dt as dt_util
 
 from .api import (
     BookingDetailsError,
@@ -67,6 +68,8 @@ class GrabCoordinator(DataUpdateCoordinator[dict[str, Any]]):
         self.share_message: str = entry.data.get(CONF_SHARE_MESSAGE, "")
         self.booking_id: str | None = None
         self.share_url: str | None = None
+        self.last_poll: datetime | None = None
+        self.last_error: str | None = None
 
         super().__init__(
             hass,
@@ -108,10 +111,13 @@ class GrabCoordinator(DataUpdateCoordinator[dict[str, Any]]):
         self.share_message = message
         self.booking_id = None
         self.share_url = None
+        self.last_poll = None
+        self.last_error = None
 
     async def _async_update_data(self) -> dict[str, Any]:
         """Fetch the latest booking details."""
         if not self.share_message:
+            self.last_error = None
             return {}
 
         try:
@@ -121,15 +127,24 @@ class GrabCoordinator(DataUpdateCoordinator[dict[str, Any]]):
                 self.share_url = resolved.share_url
             raw = await self.client.get_booking_details(self.booking_id)
         except NoShareUrlError as err:
-            raise UpdateFailed("No Grab share link found in the message") from err
+            self.last_error = "No Grab share link found in the message"
+            raise UpdateFailed(self.last_error) from err
         except ResolveError as err:
-            raise UpdateFailed(f"Could not resolve the share link: {err}") from err
+            self.last_error = f"Could not resolve the share link: {err}"
+            raise UpdateFailed(self.last_error) from err
         except BookingDetailsError as err:
-            raise UpdateFailed(f"Grab API error: {err}") from err
+            self.last_error = f"Grab API error: {err}"
+            raise UpdateFailed(self.last_error) from err
         except GrabApiError as err:
-            raise UpdateFailed(str(err)) from err
+            self.last_error = str(err)
+            raise UpdateFailed(self.last_error) from err
+        except Exception as err:  # noqa: BLE001 - record and let HA log it
+            self.last_error = f"Unexpected error: {err}"
+            raise
 
         data = normalize_booking_details(raw)
         data["share_url"] = self.share_url
         data["booking_id"] = self.booking_id
+        self.last_poll = dt_util.utcnow()
+        self.last_error = None
         return data

@@ -130,4 +130,10 @@ async def async_get_config_entry_diagnostics(
         "options": dict(entry.options),
         "coordinator_data": data,
         "last_update_success": coordinator.last_update_success,
+        "last_poll": (
+            coordinator.last_poll.isoformat()
+            if coordinator.last_poll is not None
+            else None
+        ),
+        "last_error": coordinator.last_error,
     }
