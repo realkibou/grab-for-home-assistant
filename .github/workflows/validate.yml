@@ -31,3 +31,7 @@ jobs:
         uses: hacs/action@main
         with:
           category: integration
+          # CC BY-NC 4.0 is not part of GitHub's licensee corpus, so the SPDX
+          # license check can never pass. The repository is licensed CC BY-NC
+          # 4.0 on purpose (non-commercial, attribution required).
+          ignore: license
