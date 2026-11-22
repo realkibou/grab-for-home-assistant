@@ -17,7 +17,9 @@
         "title": "Grab Link options",
         "data": {
           "scan_interval": "Update interval (seconds)",
-          "approach_window": "Driver approaching window (seconds)"
+          "approach_window": "Driver approaching window (seconds)",
+          "clear_after_completed": "Clear link after COMPLETED (seconds, 0 = never)",
+          "clear_after_cancelled": "Clear link after CANCELLED_MAX (seconds, 0 = never)"
         }
       }
     }
@@ -26,6 +28,10 @@
     "set_share_message": {
       "name": "Set share message",
       "description": "Replaces the Grab share message (or link) tracked by the targeted entries. Without a target, every entry is updated."
+    },
+    "clear_share_message": {
+      "name": "Clear share message",
+      "description": "Clears the tracked Grab share link for the targeted entries, stopping polling until a new link is set."
     }
   },
   "entity": {
@@ -93,6 +99,11 @@
     "text": {
       "share_message": {
         "name": "Share message"
+      }
+    },
+    "button": {
+      "confirm_share_message": {
+        "name": "Confirm share message"
       }
     }
   }

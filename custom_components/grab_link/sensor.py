@@ -271,6 +271,13 @@ class GrabDebugSensor(GrabSensor):
             ),
             "last_error": self.coordinator.last_error,
             "last_update_success": self.coordinator.last_update_success,
+            "clear_after_completed": self.coordinator.clear_after_completed,
+            "clear_after_cancelled": self.coordinator.clear_after_cancelled,
+            "clear_scheduled_for": (
+                self.coordinator.clear_scheduled_for.isoformat()
+                if self.coordinator.clear_scheduled_for is not None
+                else None
+            ),
             "scan_interval": (
                 int(interval.total_seconds())
                 if interval is not None

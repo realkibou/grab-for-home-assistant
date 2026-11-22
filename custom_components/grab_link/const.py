@@ -17,16 +17,23 @@ CONF_SHARE_MESSAGE: Final = "share_message"
 # Config entry options
 CONF_SCAN_INTERVAL: Final = "scan_interval"
 CONF_APPROACH_WINDOW: Final = "approach_window"
+CONF_CLEAR_AFTER_COMPLETED: Final = "clear_after_completed"
+CONF_CLEAR_AFTER_CANCELLED: Final = "clear_after_cancelled"
 
 DEFAULT_SCAN_INTERVAL: Final = 30
 DEFAULT_APPROACH_WINDOW: Final = 300
+DEFAULT_CLEAR_AFTER_COMPLETED: Final = 0
+DEFAULT_CLEAR_AFTER_CANCELLED: Final = 0
 MIN_SCAN_INTERVAL: Final = 10
 MAX_SCAN_INTERVAL: Final = 3600
 MIN_APPROACH_WINDOW: Final = 30
 MAX_APPROACH_WINDOW: Final = 1800
+MIN_CLEAR_DELAY: Final = 0
+MAX_CLEAR_DELAY: Final = 86400
 
 # Services
 SERVICE_SET_SHARE_MESSAGE: Final = "set_share_message"
+SERVICE_CLEAR_SHARE_MESSAGE: Final = "clear_share_message"
 ATTR_MESSAGE: Final = "message"
 
 # Grab share links
@@ -58,4 +65,9 @@ DASHBOARD_URL_PATH: Final = "grab"
 DASHBOARD_TITLE: Final = "Grab"
 DASHBOARD_ICON: Final = "mdi:moped"
 
-PLATFORMS: Final = [Platform.BINARY_SENSOR, Platform.SENSOR, Platform.TEXT]
+PLATFORMS: Final = [
+    Platform.BINARY_SENSOR,
+    Platform.BUTTON,
+    Platform.SENSOR,
+    Platform.TEXT,
+]

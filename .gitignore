@@ -24,6 +24,9 @@ Thumbs.db
 # Logs
 *.log
 
+# Todo
+.todo
+
 # Secrets / local env
 .env
 *.env

@@ -87,7 +87,7 @@ DASHBOARD_CONFIG_V1: dict[str, Any] = {
     ],
 }
 
-DASHBOARD_CONFIG: dict[str, Any] = {
+DASHBOARD_CONFIG_V2: dict[str, Any] = {
     "title": DASHBOARD_TITLE,
     "views": [
         {
@@ -156,6 +156,104 @@ DASHBOARD_CONFIG: dict[str, Any] = {
                             "title": "Delivery",
                             "entities": [
                                 "sensor.grab_link_pending_delivery",
+                            ],
+                        },
+                        {
+                            "type": "entities",
+                            "title": "Debug",
+                            "entities": [
+                                "sensor.grab_link_debug",
+                                "sensor.grab_link_last_poll",
+                                "sensor.grab_link_debug_route_eta",
+                                "sensor.grab_link_debug_now_timestamp",
+                                "sensor.grab_link_eta_difference",
+                            ],
+                        },
+                    ],
+                },
+            ],
+        },
+    ],
+}
+
+DASHBOARD_CONFIG: dict[str, Any] = {
+    "title": DASHBOARD_TITLE,
+    "views": [
+        {
+            "title": DASHBOARD_TITLE,
+            "icon": DASHBOARD_ICON,
+            "type": "sections",
+            "sections": [
+                {
+                    "type": "grid",
+                    "cards": [
+                        {
+                            "type": "horizontal-stack",
+                            "cards": [
+                                {
+                                    "type": "entities",
+                                    "entities": [
+                                        {
+                                            "entity": "text.grab_link_share_message",
+                                            "name": "Share Message",
+                                        }
+                                    ],
+                                },
+                                {
+                                    "type": "button",
+                                    "entity": "button.grab_link_confirm_share_message",
+                                    "name": "Confirm",
+                                    "icon": "mdi:check-bold",
+                                    "show_state": False,
+                                    "icon_height": "48px",
+                                },
+                            ],
+                        },
+                        {
+                            "type": "entities",
+                            "title": "Grab Link",
+                            "entities": [
+                                {
+                                    "entity": "sensor.grab_link_booking",
+                                    "name": "Booking State",
+                                },
+                                {
+                                    "entity": "sensor.grab_link_order_from",
+                                    "name": "Order From",
+                                },
+                                {
+                                    "entity": "sensor.grab_link_order_to",
+                                    "name": "Order To",
+                                },
+                                {
+                                    "entity": "sensor.grab_link_message",
+                                    "name": "Message",
+                                },
+                                {
+                                    "entity": "sensor.grab_link_title",
+                                    "name": "Title",
+                                },
+                            ],
+                        },
+                        {
+                            "type": "entities",
+                            "title": "Driver & Vehicle",
+                            "entities": [
+                                "sensor.grab_link_driver_name",
+                                "sensor.grab_link_vehicle_model",
+                                "sensor.grab_link_vehicle_plate",
+                                "sensor.grab_link_booking_code",
+                            ],
+                        },
+                        {
+                            "type": "entities",
+                            "title": "Delivery",
+                            "entities": [
+                                "sensor.grab_link_pending_delivery",
+                                "sensor.grab_link_route_eta",
+                                "sensor.grab_link_driver_arrival",
+                                "binary_sensor.grab_link_driver_approaching",
+                                "binary_sensor.grab_link_order_cancelled",
                             ],
                         },
                         {
@@ -262,7 +360,7 @@ async def async_ensure_dashboard(hass: HomeAssistant) -> None:
 
 
 async def _async_upgrade_existing_dashboard(dashboard: Any) -> None:
-    """Upgrade an untouched 1.1.x dashboard to the current layout."""
+    """Upgrade an untouched auto-generated dashboard to the current layout."""
     from homeassistant.components.lovelace import dashboard as lovelace_dashboard
 
     if not isinstance(dashboard, lovelace_dashboard.LovelaceStorage):
@@ -274,7 +372,7 @@ async def _async_upgrade_existing_dashboard(dashboard: Any) -> None:
         LOGGER.debug("Could not read the Grab dashboard for upgrade", exc_info=True)
         return
 
-    if config != DASHBOARD_CONFIG_V1:
+    if config != DASHBOARD_CONFIG_V1 and config != DASHBOARD_CONFIG_V2:
         return
 
     try:

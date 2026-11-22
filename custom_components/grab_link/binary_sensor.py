@@ -43,11 +43,11 @@ def _driver_approaching(data: dict[str, Any], window: int) -> bool | None:
     return seconds <= window
 
 
-def _order_cancelled(data: dict[str, Any], window: int) -> bool | None:
-    """Return whether the order has been cancelled."""
+def _order_cancelled(data: dict[str, Any], window: int) -> bool:
+    """Return whether the order has been cancelled (False when unknown)."""
     state = data.get("booking_state")
     if not state:
-        return None
+        return False
     return "CANCEL" in str(state).upper()
 
 

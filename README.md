@@ -37,11 +37,15 @@ share link.
   (`mdi:moped`, `mdi:chef-hat`, `mdi:cancel`, `mdi:check-circle`, `mdi:bug`)
 - **Driver approaching binary sensor** – on when the ETA is within a
   configurable window (default 5 minutes)
-- **Order cancelled binary sensor** – on when Grab reports a cancelled order
+- **Order cancelled binary sensor** – `False` while the order is not cancelled,
+  `True` when Grab reports `CANCELLED_MAX`
 - **Debug sensors** – last poll time, route ETA and ETA difference in unix
   time, plus a debug status sensor with the last error
-- **`grab_link.set_share_message` service** – swap the tracked order from an
-  automation or script
+- **Confirm button & auto-clear** – paste a link and press **Confirm**; the
+  link can also be cleared automatically a configurable time after
+  `COMPLETED` / `CANCELLED_MAX`
+- **`grab_link.set_share_message` / `grab_link.clear_share_message` services**
+  – swap or clear the tracked order from an automation or script
 - **Diagnostics** – downloadable redacted diagnostics for troubleshooting
 - **HACS ready** – validated by hassfest and the HACS action
 
@@ -75,32 +79,41 @@ Copy the `custom_components/grab_link` folder into your Home Assistant
 
 1. Open the **Grab** dashboard.
 2. Paste the Grab share message or just the `https://app.grab.com/s/...` link
-   into the **Share message** text box and press Enter.
+   into the **Share message** text box and press Enter, or click **Confirm**
+   next to it.
 3. The sensors fill in within a few seconds. Paste a new link there whenever
-   you have a new order.
+   you have a new order. To stop tracking, clear the text box and confirm (or
+   call `grab_link.clear_share_message`).
+
+> The text box only submits when it loses focus or Enter is pressed. The
+> **Confirm** button blurs the field and applies whatever is in it, so pasting
+> a link and clicking it is enough.
 
 The share link is stored in the config entry, so it survives restarts.
 
 ### Options
 
 Open **Settings → Devices & services**, find the **Grab for Home Assistant**
-entry, open it and choose **Configure** (the gear / ⋮ menu). Both settings can
+entry, open it and choose **Configure** (the gear / ⋮ menu). All settings can
 be changed there; saving reloads the integration.
 
 | Option | Default | Range | Description |
 | --- | --- | --- | --- |
 | Update interval | 30 s | 10–3600 s | How often booking details are polled from Grab |
 | Driver approaching window | 300 s | 30–1800 s | How close (in seconds) the ETA must be for `driver_approaching` to turn on |
+| Clear link after COMPLETED | 0 (never) | 0–86400 s | Clear the tracked link automatically this many seconds after the order reaches `COMPLETED` |
+| Clear link after CANCELLED_MAX | 0 (never) | 0–86400 s | Clear the tracked link automatically this many seconds after the order reaches `CANCELLED_MAX` |
 
 > Older versions of the integration did not expose this dialog. Update to
-> **1.2.0** or newer; if **Configure** is still missing, remove and re-add the
+> **1.3.0** or newer; if **Configure** is still missing, remove and re-add the
 > integration entry (your share link is stored in the entry, so paste it again
 > on the Grab dashboard).
 
 ## Updating the tracked order
 
-Paste the new link into the **Share message** text box on the Grab dashboard,
-or call the `grab_link.set_share_message` service:
+Paste the new link into the **Share message** text box on the Grab dashboard and
+press Enter (or click **Confirm**), or call the
+`grab_link.set_share_message` service:
 
 ```yaml
 action: grab_link.set_share_message
@@ -111,6 +124,31 @@ data:
 ```
 
 If no target is given, **all** Grab for Home Assistant entries are updated.
+
+### Clearing the tracked order
+
+Clear the text box and confirm, or call the `grab_link.clear_share_message`
+service (no fields needed):
+
+```yaml
+action: grab_link.clear_share_message
+target:
+  entity_id: text.grab_link_share_message
+```
+
+You can also set the text entity directly, e.g. from an automation:
+
+```yaml
+action: text.set_value
+target:
+  entity_id: text.grab_link_share_message
+data:
+  value: ""
+```
+
+Clearing stops polling and makes the booking/ETA sensors `unknown` until a new
+link is provided. The two **Clear link after …** options can do this
+automatically after a finished or cancelled order.
 
 ### Example: track whatever is in a helper
 
@@ -140,6 +178,7 @@ below assume you keep that name.
 | Entity | Description |
 | --- | --- |
 | `text.grab_link_share_message` | Text box holding the tracked share link |
+| `button.grab_link_confirm_share_message` | Applies the value in the share-message text box |
 | `sensor.grab_link_booking` | Booking state (e.g. `ONGOING`); all details as attributes |
 | `sensor.grab_link_booking_code` | Grab booking code |
 | `sensor.grab_link_route_eta` | Route ETA (timestamp) |
@@ -158,7 +197,7 @@ below assume you keep that name.
 | `sensor.grab_link_debug_now_timestamp` | Current time as a unix timestamp (updated on each poll) |
 | `sensor.grab_link_eta_difference` | Seconds between the route ETA and now |
 | `binary_sensor.grab_link_driver_approaching` | On when the ETA is inside the approach window |
-| `binary_sensor.grab_link_order_cancelled` | On when Grab reports the order as cancelled |
+| `binary_sensor.grab_link_order_cancelled` | `True` when the order is `CANCELLED_MAX`, `False` otherwise |
 
 ### Dynamic status icon
 
@@ -189,7 +228,9 @@ working.
 ### Attributes of `sensor.grab_link_debug`
 
 `booking_id`, `share_url`, `last_poll` (ISO timestamp), `last_error`,
-`last_update_success`, `scan_interval` (seconds).
+`last_update_success`, `scan_interval` (seconds), `clear_after_completed`,
+`clear_after_cancelled` and `clear_scheduled_for` (ISO timestamp of a pending
+automatic clear).
 
 `sensor.grab_link_debug` is `no_share_link` before a link is pasted, `ok` while
 polling works, `error` when the last poll failed (reason in `last_error`), and
@@ -200,18 +241,18 @@ available even when polling fails, so you can always see what went wrong.
 
 The integration creates a storage dashboard at `/grab` with a *sections* view:
 
-- **Grab Link** – share message text box, booking state, driver, order
-  from/to, route ETA, driver arrival, message, title
-- **Driver & Vehicle** – vehicle model/plate, booking code, driver approaching,
-  order cancelled
-- **Delivery** – pending delivery flag
+- **Grab Link** – share message text box with a **Confirm** button, booking
+  state, order from/to, message, title
+- **Driver & Vehicle** – driver name, vehicle model/plate, booking code
+- **Delivery** – pending delivery, route ETA, driver arrival, driver
+  approaching, order cancelled
 - **Debug** – debug status, last poll, raw route ETA, current unix timestamp,
   ETA difference
 
 You can rearrange and extend it freely; the integration only creates the
 dashboard when it does not exist. If you delete it, it is recreated on the next
-start. An untouched dashboard from 1.1.x is upgraded automatically; your own
-edits are preserved.
+start. Untouched dashboards from 1.1.x and 1.2.0 are upgraded automatically;
+your own edits are preserved.
 
 ## Examples
 

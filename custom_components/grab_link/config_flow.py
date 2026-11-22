@@ -21,13 +21,19 @@ from homeassistant.helpers.selector import (
 
 from .const import (
     CONF_APPROACH_WINDOW,
+    CONF_CLEAR_AFTER_CANCELLED,
+    CONF_CLEAR_AFTER_COMPLETED,
     CONF_SCAN_INTERVAL,
     DEFAULT_APPROACH_WINDOW,
+    DEFAULT_CLEAR_AFTER_CANCELLED,
+    DEFAULT_CLEAR_AFTER_COMPLETED,
     DEFAULT_SCAN_INTERVAL,
     DOMAIN,
     MAX_APPROACH_WINDOW,
+    MAX_CLEAR_DELAY,
     MAX_SCAN_INTERVAL,
     MIN_APPROACH_WINDOW,
+    MIN_CLEAR_DELAY,
     MIN_SCAN_INTERVAL,
 )
 
@@ -112,6 +118,36 @@ class GrabOptionsFlow(config_entries.OptionsFlow):
                         NumberSelectorConfig(
                             min=MIN_APPROACH_WINDOW,
                             max=MAX_APPROACH_WINDOW,
+                            step=1,
+                            mode=NumberSelectorMode.BOX,
+                            unit_of_measurement="s",
+                        )
+                    ),
+                    vol.Required(
+                        CONF_CLEAR_AFTER_COMPLETED,
+                        default=options.get(
+                            CONF_CLEAR_AFTER_COMPLETED,
+                            DEFAULT_CLEAR_AFTER_COMPLETED,
+                        ),
+                    ): NumberSelector(
+                        NumberSelectorConfig(
+                            min=MIN_CLEAR_DELAY,
+                            max=MAX_CLEAR_DELAY,
+                            step=1,
+                            mode=NumberSelectorMode.BOX,
+                            unit_of_measurement="s",
+                        )
+                    ),
+                    vol.Required(
+                        CONF_CLEAR_AFTER_CANCELLED,
+                        default=options.get(
+                            CONF_CLEAR_AFTER_CANCELLED,
+                            DEFAULT_CLEAR_AFTER_CANCELLED,
+                        ),
+                    ): NumberSelector(
+                        NumberSelectorConfig(
+                            min=MIN_CLEAR_DELAY,
+                            max=MAX_CLEAR_DELAY,
                             step=1,
                             mode=NumberSelectorMode.BOX,
                             unit_of_measurement="s",

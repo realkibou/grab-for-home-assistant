@@ -17,11 +17,16 @@ from homeassistant.helpers.typing import ConfigType
 from .api import GrabClient, NoShareUrlError, extract_share_url
 from .const import (
     ATTR_MESSAGE,
+    CONF_CLEAR_AFTER_CANCELLED,
+    CONF_CLEAR_AFTER_COMPLETED,
     CONF_SCAN_INTERVAL,
     CONF_SHARE_MESSAGE,
+    DEFAULT_CLEAR_AFTER_CANCELLED,
+    DEFAULT_CLEAR_AFTER_COMPLETED,
     DEFAULT_SCAN_INTERVAL,
     DOMAIN,
     PLATFORMS,
+    SERVICE_CLEAR_SHARE_MESSAGE,
     SERVICE_SET_SHARE_MESSAGE,
 )
 from .coordinator import GrabCoordinator
@@ -39,6 +44,12 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
         SERVICE_SET_SHARE_MESSAGE,
         _async_set_share_message,
         schema=SERVICE_SCHEMA,
+    )
+    hass.services.async_register(
+        DOMAIN,
+        SERVICE_CLEAR_SHARE_MESSAGE,
+        _async_clear_share_message,
+        schema=vol.Schema({}),
     )
     return True
 
@@ -61,7 +72,8 @@ async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     """Unload a config entry."""
     if not await hass.config_entries.async_unload_platforms(entry, PLATFORMS):
         return False
-    hass.data[DOMAIN].pop(entry.entry_id)
+    coordinator: GrabCoordinator = hass.data[DOMAIN].pop(entry.entry_id)
+    coordinator.cancel_auto_clear()
     return True
 
 
@@ -77,23 +89,25 @@ async def _async_entry_updated(hass: HomeAssistant, entry: ConfigEntry) -> None:
     scan_interval = timedelta(
         seconds=entry.options.get(CONF_SCAN_INTERVAL, DEFAULT_SCAN_INTERVAL)
     )
-    if coordinator.update_interval != scan_interval:
+    clear_options_changed = (
+        entry.options.get(
+            CONF_CLEAR_AFTER_COMPLETED, DEFAULT_CLEAR_AFTER_COMPLETED
+        )
+        != coordinator.clear_after_completed
+        or entry.options.get(
+            CONF_CLEAR_AFTER_CANCELLED, DEFAULT_CLEAR_AFTER_CANCELLED
+        )
+        != coordinator.clear_after_cancelled
+    )
+    if coordinator.update_interval != scan_interval or clear_options_changed:
         await hass.config_entries.async_reload(entry.entry_id)
 
 
-async def _async_set_share_message(call: ServiceCall) -> None:
-    """Update the tracked Grab share message for the targeted entries."""
-    hass = call.hass
-    message = call.data[ATTR_MESSAGE].strip()
-
-    try:
-        extract_share_url(message)
-    except NoShareUrlError as err:
-        raise HomeAssistantError(
-            "No Grab share link (https://app.grab.com/s/...) found in the message"
-        ) from err
-
-    coordinators = list(hass.data.get(DOMAIN, {}).values())
+async def _async_target_coordinators(
+    call: ServiceCall,
+) -> list[GrabCoordinator]:
+    """Return the coordinators selected by a service call target."""
+    coordinators = list(call.hass.data.get(DOMAIN, {}).values())
 
     entry_ids = await service.async_extract_config_entry_ids(call)
     if entry_ids:
@@ -110,8 +124,28 @@ async def _async_set_share_message(call: ServiceCall) -> None:
     if not coordinators:
         raise HomeAssistantError("Grab Link Tracking is not set up")
 
-    for coordinator in coordinators:
+    return coordinators
+
+
+async def _async_set_share_message(call: ServiceCall) -> None:
+    """Update the tracked Grab share message for the targeted entries."""
+    message = call.data[ATTR_MESSAGE].strip()
+
+    try:
+        extract_share_url(message)
+    except NoShareUrlError as err:
+        raise HomeAssistantError(
+            "No Grab share link (https://app.grab.com/s/...) found in the message"
+        ) from err
+
+    for coordinator in await _async_target_coordinators(call):
         await coordinator.async_update_share_message(message)
+
+
+async def _async_clear_share_message(call: ServiceCall) -> None:
+    """Clear the tracked Grab share message for the targeted entries."""
+    for coordinator in await _async_target_coordinators(call):
+        await coordinator.async_update_share_message("")
 
 
 async def async_get_config_entry_diagnostics(
@@ -136,4 +170,11 @@ async def async_get_config_entry_diagnostics(
             else None
         ),
         "last_error": coordinator.last_error,
+        "clear_after_completed": coordinator.clear_after_completed,
+        "clear_after_cancelled": coordinator.clear_after_cancelled,
+        "clear_scheduled_for": (
+            coordinator.clear_scheduled_for.isoformat()
+            if coordinator.clear_scheduled_for is not None
+            else None
+        ),
     }
