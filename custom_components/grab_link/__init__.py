@@ -10,6 +10,7 @@ from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant, ServiceCall
 from homeassistant.exceptions import HomeAssistantError
 from homeassistant.helpers import config_validation as cv
+from homeassistant.helpers import entity_registry as er
 from homeassistant.helpers import service
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
 from homeassistant.helpers.typing import ConfigType
@@ -25,6 +26,7 @@ from .const import (
     DEFAULT_CLEAR_AFTER_COMPLETED,
     DEFAULT_SCAN_INTERVAL,
     DOMAIN,
+    LOGGER,
     PLATFORMS,
     SERVICE_SET_SHARE_MESSAGE,
 )
@@ -34,6 +36,26 @@ from .dashboard import async_ensure_dashboard
 CONFIG_SCHEMA = cv.config_entry_only_config_schema(DOMAIN)
 
 SERVICE_SCHEMA = vol.Schema({vol.Required(ATTR_MESSAGE): cv.string})
+
+# Entities that were shipped in earlier releases and have been removed.
+RETIRED_ENTITIES: tuple[tuple[str, str], ...] = (
+    ("binary_sensor", "order_cancelled"),
+    ("sensor", "pending_delivery"),
+)
+
+
+def _async_remove_retired_entities(
+    hass: HomeAssistant, entry: ConfigEntry
+) -> None:
+    """Delete registry entries for entities that no longer exist."""
+    registry = er.async_get(hass)
+    for domain, key in RETIRED_ENTITIES:
+        entity_id = registry.async_get_entity_id(
+            domain, DOMAIN, f"{entry.entry_id}_{key}"
+        )
+        if entity_id is not None:
+            registry.async_remove(entity_id)
+            LOGGER.info("Removed retired entity %s", entity_id)
 
 
 async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
@@ -54,6 +76,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     await coordinator.async_config_entry_first_refresh()
 
     hass.data.setdefault(DOMAIN, {})[entry.entry_id] = coordinator
+    _async_remove_retired_entities(hass, entry)
     await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
     entry.async_on_unload(entry.add_update_listener(_async_entry_updated))
 

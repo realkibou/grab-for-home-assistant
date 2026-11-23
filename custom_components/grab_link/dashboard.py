@@ -14,6 +14,7 @@ from .const import DASHBOARD_ICON, DASHBOARD_TITLE, DASHBOARD_URL_PATH, LOGGER
 #   V1: 1.1.x
 #   V2: 1.2.0
 #   V3: 1.3.0
+#   V4: 1.3.1
 DASHBOARD_CONFIG_V1: dict[str, Any] = {
     "title": DASHBOARD_TITLE,
     "views": [
@@ -279,7 +280,7 @@ DASHBOARD_CONFIG_V3: dict[str, Any] = {
 }
 
 
-DASHBOARD_CONFIG: dict[str, Any] = {
+DASHBOARD_CONFIG_V4: dict[str, Any] = {
     "title": DASHBOARD_TITLE,
     "views": [
         {
@@ -347,6 +348,106 @@ DASHBOARD_CONFIG: dict[str, Any] = {
                                 "sensor.grab_link_route_eta",
                                 "binary_sensor.grab_link_driver_approaching",
                                 "binary_sensor.grab_link_order_cancelled",
+                            ],
+                        },
+                        {
+                            "type": "entities",
+                            "title": "Driver & Vehicle",
+                            "entities": [
+                                "sensor.grab_link_driver_name",
+                                "sensor.grab_link_vehicle_model",
+                                "sensor.grab_link_vehicle_plate",
+                            ],
+                        },
+                        {
+                            "type": "entities",
+                            "title": "Debug",
+                            "entities": [
+                                "sensor.grab_link_debug",
+                                "sensor.grab_link_last_poll",
+                                "sensor.grab_link_debug_route_eta",
+                                "sensor.grab_link_debug_now_timestamp",
+                                "sensor.grab_link_eta_difference",
+                                "sensor.grab_link_booking_code",
+                            ],
+                        },
+                    ],
+                },
+            ],
+        },
+    ],
+}
+
+
+DASHBOARD_CONFIG: dict[str, Any] = {
+    "title": DASHBOARD_TITLE,
+    "views": [
+        {
+            "title": DASHBOARD_TITLE,
+            "icon": DASHBOARD_ICON,
+            "type": "sections",
+            "sections": [
+                {
+                    "type": "grid",
+                    "cards": [
+                        {
+                            "type": "horizontal-stack",
+                            "cards": [
+                                {
+                                    "type": "entities",
+                                    "entities": [
+                                        {
+                                            "entity": "text.grab_link_share_message",
+                                            "name": "Share Message",
+                                        }
+                                    ],
+                                },
+                                {
+                                    "type": "button",
+                                    "entity": (
+                                        "button.grab_link_confirm_share_message"
+                                    ),
+                                    "name": "Confirm",
+                                    "icon": "mdi:check-bold",
+                                    "show_state": False,
+                                    "icon_height": "48px",
+                                    "tap_action": {"action": "toggle"},
+                                    "hold_action": {"action": "toggle"},
+                                },
+                            ],
+                        },
+                        {
+                            "type": "entities",
+                            "title": "Order Info",
+                            "entities": [
+                                {
+                                    "entity": "sensor.grab_link_booking",
+                                    "name": "Booking State",
+                                },
+                                {
+                                    "entity": "sensor.grab_link_order_from",
+                                    "name": "Order From",
+                                },
+                                {
+                                    "entity": "sensor.grab_link_order_to",
+                                    "name": "Order To",
+                                },
+                                {
+                                    "entity": "sensor.grab_link_message",
+                                    "name": "Message",
+                                },
+                                {
+                                    "entity": "sensor.grab_link_title",
+                                    "name": "Title",
+                                },
+                            ],
+                        },
+                        {
+                            "type": "entities",
+                            "title": "Delivery",
+                            "entities": [
+                                "sensor.grab_link_route_eta",
+                                "binary_sensor.grab_link_driver_approaching",
                             ],
                         },
                         {
@@ -479,6 +580,7 @@ async def _async_upgrade_existing_dashboard(dashboard: Any) -> None:
         config != DASHBOARD_CONFIG_V1
         and config != DASHBOARD_CONFIG_V2
         and config != DASHBOARD_CONFIG_V3
+        and config != DASHBOARD_CONFIG_V4
     ):
         return
 

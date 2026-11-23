@@ -43,14 +43,6 @@ def _driver_approaching(data: dict[str, Any], window: int) -> bool | None:
     return seconds <= window
 
 
-def _order_cancelled(data: dict[str, Any], window: int) -> bool:
-    """Return whether the order has been cancelled (False when unknown)."""
-    state = data.get("booking_state")
-    if not state:
-        return False
-    return "CANCEL" in str(state).upper()
-
-
 BINARY_SENSOR_DESCRIPTIONS: tuple[GrabBinarySensorEntityDescription, ...] = (
     GrabBinarySensorEntityDescription(
         key="driver_approaching",
@@ -58,13 +50,6 @@ BINARY_SENSOR_DESCRIPTIONS: tuple[GrabBinarySensorEntityDescription, ...] = (
         device_class=BinarySensorDeviceClass.PRESENCE,
         icon="mdi:moped-outline",
         is_on_fn=_driver_approaching,
-    ),
-    GrabBinarySensorEntityDescription(
-        key="order_cancelled",
-        translation_key="order_cancelled",
-        device_class=BinarySensorDeviceClass.PROBLEM,
-        icon="mdi:cancel",
-        is_on_fn=_order_cancelled,
     ),
 )
 

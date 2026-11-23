@@ -31,14 +31,11 @@ share link.
   **Share message** text box and all order details; created on install
 - **Live polling** – booking details refresh every 30 s by default (configurable)
 - **Native sensors** – booking state, booking code, route ETA, driver arrival,
-  driver name, vehicle model/plate, pickup/drop-off, status title/message,
-  pending delivery
+  driver name, vehicle model/plate, pickup/drop-off, status title/message
 - **Dynamic status icon** – the booking sensor icon follows the order state
   (`mdi:moped`, `mdi:chef-hat`, `mdi:cancel`, `mdi:check-circle`, `mdi:bug`)
 - **Driver approaching binary sensor** – on when the ETA is within a
   configurable window (default 5 minutes)
-- **Order cancelled binary sensor** – `False` while the order is not cancelled,
-  `True` when Grab reports `CANCELLED_MAX`
 - **Debug sensors** – last poll time, route ETA and ETA difference in unix
   time, plus a debug status sensor with the last error
 - **Confirm button & auto-clear** – paste a link and press **Confirm**; the
@@ -100,8 +97,8 @@ be changed there; saving reloads the integration.
 | --- | --- | --- | --- |
 | Update interval | 30 s | 10–3600 s | How often booking details are polled from Grab |
 | Driver approaching window | 300 s | 30–1800 s | How close (in seconds) the ETA must be for `driver_approaching` to turn on |
-| Clear link after COMPLETED | 0 (never) | 0–86400 s | Clear the tracked link automatically this many seconds after the order reaches `COMPLETED` |
-| Clear link after CANCELLED_MAX | 0 (never) | 0–86400 s | Clear the tracked link automatically this many seconds after the order reaches `CANCELLED_MAX` |
+| Clear link after COMPLETED | 300 s | 0–86400 s | Clear the tracked link automatically this many seconds after the order reaches `COMPLETED` (`0` = never) |
+| Clear link after CANCELLED_MAX | 300 s | 0–86400 s | Clear the tracked link automatically this many seconds after the order reaches `CANCELLED_MAX` (`0` = never) |
 
 > Older versions of the integration did not expose this dialog. Update to
 > **1.3.0** or newer; if **Configure** is still missing, remove and re-add the
@@ -168,7 +165,6 @@ below assume you keep that name.
 | `sensor.grab_link_order_to` | Drop-off location |
 | `sensor.grab_link_title` | Status title |
 | `sensor.grab_link_message` | Status message |
-| `sensor.grab_link_pending_delivery` | Pending delivery flag |
 | `sensor.grab_link_vehicle_model` | Vehicle model |
 | `sensor.grab_link_vehicle_plate` | Vehicle plate number |
 | `sensor.grab_link_last_poll` | Timestamp of the last successful poll |
@@ -177,7 +173,6 @@ below assume you keep that name.
 | `sensor.grab_link_debug_now_timestamp` | Current time as a unix timestamp (updated on each poll) |
 | `sensor.grab_link_eta_difference` | Seconds between the route ETA and now |
 | `binary_sensor.grab_link_driver_approaching` | On when the ETA is inside the approach window |
-| `binary_sensor.grab_link_order_cancelled` | `True` when the order is `CANCELLED_MAX`, `False` otherwise |
 
 ### Dynamic status icon
 
@@ -223,14 +218,14 @@ The integration creates a storage dashboard at `/grab` with a *sections* view:
 
 - **Order Info** – share message text box with a **Confirm** button, booking
   state, order from/to, message, title
-- **Delivery** – route ETA, driver approaching, order cancelled
+- **Delivery** – route ETA, driver approaching
 - **Driver & Vehicle** – driver name, vehicle model/plate
 - **Debug** – debug status, last poll, raw route ETA, current unix timestamp,
   ETA difference, booking code
 
 You can rearrange and extend it freely; the integration only creates the
 dashboard when it does not exist. If you delete it, it is recreated on the next
-start. Untouched dashboards from 1.1.x, 1.2.0 and 1.3.0 are upgraded
+start. Untouched dashboards from 1.1.x, 1.2.0, 1.3.0 and 1.3.1 are upgraded
 automatically; your own edits are preserved.
 
 ## Examples
@@ -260,8 +255,8 @@ actions:
 alias: Grab order cancelled
 triggers:
   - trigger: state
-    entity_id: binary_sensor.grab_link_order_cancelled
-    to: "on"
+    entity_id: sensor.grab_link_booking
+    to: CANCELLED_MAX
 actions:
   - action: notify.mobile_app_your_phone
     data:

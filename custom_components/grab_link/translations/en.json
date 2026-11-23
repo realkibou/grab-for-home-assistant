@@ -59,9 +59,6 @@
       "message": {
         "name": "Message"
       },
-      "pending_delivery": {
-        "name": "Pending delivery"
-      },
       "vehicle_model": {
         "name": "Vehicle model"
       },
@@ -87,9 +84,6 @@
     "binary_sensor": {
       "driver_approaching": {
         "name": "Driver approaching"
-      },
-      "order_cancelled": {
-        "name": "Order cancelled"
       }
     },
     "text": {

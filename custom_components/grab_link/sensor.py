@@ -130,12 +130,6 @@ SENSOR_DESCRIPTIONS: tuple[GrabSensorEntityDescription, ...] = (
         value_fn=lambda coordinator: _data(coordinator).get("message"),
     ),
     GrabSensorEntityDescription(
-        key="pending_delivery",
-        translation_key="pending_delivery",
-        icon="mdi:package-variant-closed",
-        value_fn=lambda coordinator: _data(coordinator).get("is_pending_delivery"),
-    ),
-    GrabSensorEntityDescription(
         key="vehicle_model",
         translation_key="vehicle_model",
         icon="mdi:motorbike",
