@@ -13,9 +13,3 @@ set_share_message:
       selector:
         text:
           multiline: true
-clear_share_message:
-  name: Clear share message
-  description: Clears the tracked Grab share link for the targeted entries and stops polling until a new link is pasted or set.
-  target:
-    entity:
-      integration: grab_link

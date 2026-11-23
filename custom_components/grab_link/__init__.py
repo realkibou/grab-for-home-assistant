@@ -26,7 +26,6 @@ from .const import (
     DEFAULT_SCAN_INTERVAL,
     DOMAIN,
     PLATFORMS,
-    SERVICE_CLEAR_SHARE_MESSAGE,
     SERVICE_SET_SHARE_MESSAGE,
 )
 from .coordinator import GrabCoordinator
@@ -44,12 +43,6 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
         SERVICE_SET_SHARE_MESSAGE,
         _async_set_share_message,
         schema=SERVICE_SCHEMA,
-    )
-    hass.services.async_register(
-        DOMAIN,
-        SERVICE_CLEAR_SHARE_MESSAGE,
-        _async_clear_share_message,
-        schema=vol.Schema({}),
     )
     return True
 
@@ -140,12 +133,6 @@ async def _async_set_share_message(call: ServiceCall) -> None:
 
     for coordinator in await _async_target_coordinators(call):
         await coordinator.async_update_share_message(message)
-
-
-async def _async_clear_share_message(call: ServiceCall) -> None:
-    """Clear the tracked Grab share message for the targeted entries."""
-    for coordinator in await _async_target_coordinators(call):
-        await coordinator.async_update_share_message("")
 
 
 async def async_get_config_entry_diagnostics(

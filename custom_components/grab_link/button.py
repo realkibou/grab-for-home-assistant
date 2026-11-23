@@ -29,7 +29,13 @@ async def async_setup_entry(
 ) -> None:
     """Set up the Grab Link buttons from a config entry."""
     coordinator: GrabCoordinator = hass.data[DOMAIN][entry.entry_id]
-    async_add_entities([GrabConfirmShareMessageButton(coordinator, entry)])
+    async_add_entities(
+        [
+            GrabConfirmShareMessageButton(
+                coordinator, entry, CONFIRM_SHARE_MESSAGE_DESCRIPTION
+            )
+        ]
+    )
 
 
 class GrabConfirmShareMessageButton(GrabEntity, ButtonEntity):
@@ -40,7 +46,7 @@ class GrabConfirmShareMessageButton(GrabEntity, ButtonEntity):
     committed value, so pasting a link and clicking Confirm is enough.
     """
 
-    entity_description = CONFIRM_SHARE_MESSAGE_DESCRIPTION
+    entity_description: ButtonEntityDescription
 
     @property
     def available(self) -> bool:

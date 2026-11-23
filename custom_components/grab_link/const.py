@@ -33,7 +33,6 @@ MAX_CLEAR_DELAY: Final = 86400
 
 # Services
 SERVICE_SET_SHARE_MESSAGE: Final = "set_share_message"
-SERVICE_CLEAR_SHARE_MESSAGE: Final = "clear_share_message"
 ATTR_MESSAGE: Final = "message"
 
 # Grab share links

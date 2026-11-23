@@ -44,8 +44,8 @@ share link.
 - **Confirm button & auto-clear** – paste a link and press **Confirm**; the
   link can also be cleared automatically a configurable time after
   `COMPLETED` / `CANCELLED_MAX`
-- **`grab_link.set_share_message` / `grab_link.clear_share_message` services**
-  – swap or clear the tracked order from an automation or script
+- **`grab_link.set_share_message` service** – swap the tracked order from an
+  automation or script
 - **Diagnostics** – downloadable redacted diagnostics for troubleshooting
 - **HACS ready** – validated by hassfest and the HACS action
 
@@ -82,8 +82,7 @@ Copy the `custom_components/grab_link` folder into your Home Assistant
    into the **Share message** text box and press Enter, or click **Confirm**
    next to it.
 3. The sensors fill in within a few seconds. Paste a new link there whenever
-   you have a new order. To stop tracking, clear the text box and confirm (or
-   call `grab_link.clear_share_message`).
+   you have a new order. To stop tracking, clear the text box and confirm.
 
 > The text box only submits when it loses focus or Enter is pressed. The
 > **Confirm** button blurs the field and applies whatever is in it, so pasting
@@ -127,28 +126,9 @@ If no target is given, **all** Grab for Home Assistant entries are updated.
 
 ### Clearing the tracked order
 
-Clear the text box and confirm, or call the `grab_link.clear_share_message`
-service (no fields needed):
-
-```yaml
-action: grab_link.clear_share_message
-target:
-  entity_id: text.grab_link_share_message
-```
-
-You can also set the text entity directly, e.g. from an automation:
-
-```yaml
-action: text.set_value
-target:
-  entity_id: text.grab_link_share_message
-data:
-  value: ""
-```
-
-Clearing stops polling and makes the booking/ETA sensors `unknown` until a new
-link is provided. The two **Clear link after …** options can do this
-automatically after a finished or cancelled order.
+Clear the text box and press **Confirm**. Clearing stops polling and makes the
+booking/ETA sensors `unknown` until a new link is provided. The two **Clear link
+after …** options can do this automatically after a finished or cancelled order.
 
 ### Example: track whatever is in a helper
 
@@ -241,18 +221,17 @@ available even when polling fails, so you can always see what went wrong.
 
 The integration creates a storage dashboard at `/grab` with a *sections* view:
 
-- **Grab Link** – share message text box with a **Confirm** button, booking
+- **Order Info** – share message text box with a **Confirm** button, booking
   state, order from/to, message, title
-- **Driver & Vehicle** – driver name, vehicle model/plate, booking code
-- **Delivery** – pending delivery, route ETA, driver arrival, driver
-  approaching, order cancelled
+- **Delivery** – route ETA, driver approaching, order cancelled
+- **Driver & Vehicle** – driver name, vehicle model/plate
 - **Debug** – debug status, last poll, raw route ETA, current unix timestamp,
-  ETA difference
+  ETA difference, booking code
 
 You can rearrange and extend it freely; the integration only creates the
 dashboard when it does not exist. If you delete it, it is recreated on the next
-start. Untouched dashboards from 1.1.x and 1.2.0 are upgraded automatically;
-your own edits are preserved.
+start. Untouched dashboards from 1.1.x, 1.2.0 and 1.3.0 are upgraded
+automatically; your own edits are preserved.
 
 ## Examples
 

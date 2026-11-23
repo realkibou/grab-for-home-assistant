@@ -47,8 +47,8 @@ class GrabShareMessageText(GrabEntity, TextEntity):
 
     @property
     def native_value(self) -> str | None:
-        """Return the currently tracked share message (empty when cleared)."""
-        return self.coordinator.share_message
+        """Return the currently tracked share message."""
+        return self.coordinator.share_message or None
 
     async def async_set_value(self, value: str) -> None:
         """Store a new Grab share message and start tracking it."""
