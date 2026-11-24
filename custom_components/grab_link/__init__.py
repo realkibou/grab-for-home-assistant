@@ -41,6 +41,7 @@ SERVICE_SCHEMA = vol.Schema({vol.Required(ATTR_MESSAGE): cv.string})
 RETIRED_ENTITIES: tuple[tuple[str, str], ...] = (
     ("binary_sensor", "order_cancelled"),
     ("sensor", "pending_delivery"),
+    ("button", "confirm_share_message"),
 )
 
 

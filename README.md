@@ -38,9 +38,9 @@ share link.
   configurable window (default 5 minutes)
 - **Debug sensors** – last poll time, route ETA and ETA difference in unix
   time, plus a debug status sensor with the last error
-- **Confirm button & auto-clear** – paste a link and press **Confirm**; the
-  link can also be cleared automatically a configurable time after
-  `COMPLETED` / `CANCELLED_MAX`
+- **Share link & auto-clear** – paste a link into the text box; the link can
+  also be cleared automatically a configurable time after `COMPLETED` /
+  `CANCELLED_MAX`
 - **`grab_link.set_share_message` service** – swap the tracked order from an
   automation or script
 - **Diagnostics** – downloadable redacted diagnostics for troubleshooting
@@ -76,14 +76,12 @@ Copy the `custom_components/grab_link` folder into your Home Assistant
 
 1. Open the **Grab** dashboard.
 2. Paste the Grab share message or just the `https://app.grab.com/s/...` link
-   into the **Share message** text box and press Enter, or click **Confirm**
-   next to it.
+   into the **Share message** text box and press Enter or move focus away.
 3. The sensors fill in within a few seconds. Paste a new link there whenever
-   you have a new order. To stop tracking, clear the text box and confirm.
+   you have a new order. To stop tracking, clear the text box and press Enter
+   or move focus away.
 
-> The text box only submits when it loses focus or Enter is pressed. The
-> **Confirm** button blurs the field and applies whatever is in it, so pasting
-> a link and clicking it is enough.
+> The text box submits when Enter is pressed or it loses focus.
 
 The share link is stored in the config entry, so it survives restarts.
 
@@ -108,7 +106,7 @@ be changed there; saving reloads the integration.
 ## Updating the tracked order
 
 Paste the new link into the **Share message** text box on the Grab dashboard and
-press Enter (or click **Confirm**), or call the
+press Enter (or move focus away), or call the
 `grab_link.set_share_message` service:
 
 ```yaml
@@ -123,9 +121,10 @@ If no target is given, **all** Grab for Home Assistant entries are updated.
 
 ### Clearing the tracked order
 
-Clear the text box and press **Confirm**. Clearing stops polling and makes the
-booking/ETA sensors `unknown` until a new link is provided. The two **Clear link
-after …** options can do this automatically after a finished or cancelled order.
+Clear the text box and press Enter or move focus away. The text entity state
+remains an empty string, and clearing stops polling until a new link is
+provided. The two **Clear link after …** options can do this automatically
+after a finished or cancelled order.
 
 ### Example: track whatever is in a helper
 
@@ -155,7 +154,6 @@ below assume you keep that name.
 | Entity | Description |
 | --- | --- |
 | `text.grab_link_share_message` | Text box holding the tracked share link |
-| `button.grab_link_confirm_share_message` | Applies the value in the share-message text box |
 | `sensor.grab_link_booking` | Booking state (e.g. `ONGOING`); all details as attributes |
 | `sensor.grab_link_booking_code` | Grab booking code |
 | `sensor.grab_link_route_eta` | Route ETA (timestamp) |
@@ -216,8 +214,7 @@ available even when polling fails, so you can always see what went wrong.
 
 The integration creates a storage dashboard at `/grab` with a *sections* view:
 
-- **Order Info** – share message text box with a **Confirm** button, booking
-  state, order from/to, message, title
+- **Order Info** – booking state, order from/to, message, title
 - **Delivery** – route ETA, driver approaching
 - **Driver & Vehicle** – driver name, vehicle model/plate
 - **Debug** – debug status, last poll, raw route ETA, current unix timestamp,
@@ -225,7 +222,7 @@ The integration creates a storage dashboard at `/grab` with a *sections* view:
 
 You can rearrange and extend it freely; the integration only creates the
 dashboard when it does not exist. If you delete it, it is recreated on the next
-start. Untouched dashboards from 1.1.x, 1.2.0, 1.3.0 and 1.3.1 are upgraded
+start. Untouched dashboards from 1.1.x, 1.2.0, 1.3.0, 1.3.1 and 1.3.2 are upgraded
 automatically; your own edits are preserved.
 
 ## Examples

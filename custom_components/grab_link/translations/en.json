@@ -90,11 +90,6 @@
       "share_message": {
         "name": "Share message"
       }
-    },
-    "button": {
-      "confirm_share_message": {
-        "name": "Confirm share message"
-      }
     }
   }
 }

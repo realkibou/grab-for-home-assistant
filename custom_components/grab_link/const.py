@@ -66,7 +66,6 @@ DASHBOARD_ICON: Final = "mdi:moped"
 
 PLATFORMS: Final = [
     Platform.BINARY_SENSOR,
-    Platform.BUTTON,
     Platform.SENSOR,
     Platform.TEXT,
 ]
